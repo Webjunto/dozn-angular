@@ -1,7 +1,6 @@
 import { Component, Renderer } from '@angular/core';
 
 import { DoznService } from './dozn.service';
-import * as utils from './utils';
 
 @Component({
   selector: 'app-root',
