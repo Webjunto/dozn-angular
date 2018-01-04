@@ -37,12 +37,15 @@ export class DoznService {
 
   startSession(code, feature, flow) {
     const newEventSession = {
-      browser: this.getBrowserInfo(),
+      device: this.getBrowserInfo(),
       project,
-      code,
+      tester: code,
       appVersion,
-      feature,
-      flow
+      featureId: feature,
+      flowId: flow,
+      status: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     this.http.post(`${API_URL}/EventSessions`, newEventSession)
