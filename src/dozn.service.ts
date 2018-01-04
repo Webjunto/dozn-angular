@@ -9,38 +9,46 @@ import 'rxjs/add/operator/switchMap';
 
 const API_URL = 'https://doznapi.herokuapp.com/api';
 
+const { version: appVersion, name: project } = require('../../package.json');
 
 @Injectable()
 export class DoznService {
   public currentViewName: string;
   public eventSession: string;
   public doznEvents = new Subject();
+  public appVersion: string;
 
   constructor(
     public http: Http
   ) {
 
+    this.doznEvents.asObservable()
+    .distinctUntilChanged()
+    .switchMap((event: any) => {
+      const payload: any = this.prepareEvtData(event);
+      // Save to Backend
+      return this.http.post(`${API_URL}/Events`, payload);
+    })
+    .map(response => response.json())
+    .subscribe(data => {
+      console.log('saved event:', data);
+    });
+  }
+
+  startSession(code, feature, flow) {
     const newEventSession = {
-      project: 'dozn.angular',
-      browser: this.getBrowserInfo()
+      browser: this.getBrowserInfo(),
+      project,
+      code,
+      appVersion,
+      feature,
+      flow
     };
 
     this.http.post(`${API_URL}/EventSessions`, newEventSession)
       .map(response => response.json())
       .subscribe(data => {
         this.eventSession = data.id;
-      });
-
-    this.doznEvents.asObservable()
-      .distinctUntilChanged()
-      .switchMap((event: any) => {
-        const payload: any = this.prepareEvtData(event);
-        // Save to Backend
-        return this.http.post(`${API_URL}/Events`, payload);
-      })
-      .map(response => response.json())
-      .subscribe(data => {
-        console.log('saved event:', data);
       });
   }
 
