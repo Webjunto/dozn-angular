@@ -59,7 +59,7 @@ export class DoznService {
     const actualPath: any[] = [];
 
     const path = event.path.reverse();
-    path.splice(0, 1);
+    path.splice(0, 2);
     path.forEach((el: any) => {
       let className = '';
 
@@ -72,7 +72,6 @@ export class DoznService {
     });
 
     const cssSelectorPath = actualPath.join(' > ');
-
     // Find index of this specific target element, because selector can match multiples.
     const allElements = document.querySelectorAll(cssSelectorPath);
     let nodeListIndex = 0;
