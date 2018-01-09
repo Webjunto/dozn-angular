@@ -1,4 +1,5 @@
 import { Component, Renderer, OnInit, Input } from '@angular/core';
+import {Router, NavigationEnd } from '@angular/router';
 
 import { DoznService } from '../../dozn.service';
 
@@ -29,6 +30,7 @@ export class DoznAppComponent implements OnInit {
 
   constructor(
     renderer: Renderer,
+    router: Router,
     private doznService: DoznService
   ) {
 
@@ -42,6 +44,14 @@ export class DoznAppComponent implements OnInit {
      if (doznService.eventSession) {
       doznService.doznEvents.next(event);
      }
+    });
+
+    router.events.subscribe((_: NavigationEnd) => {
+      const url = _.url.replace('/', '');
+      const element = router.config.filter(e => e.path === url)[0];
+      if (element) {
+        doznService.currentViewName = element.component.name;
+      }
     });
   }
 
