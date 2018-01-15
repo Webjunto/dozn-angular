@@ -1,5 +1,6 @@
 import { Component, Renderer, OnInit, Input } from '@angular/core';
 import {Router, NavigationEnd } from '@angular/router';
+import { AngularFireDatabase } from 'angularfire2/database';
 
 import { DoznService } from '../../dozn.service';
 
@@ -10,29 +11,18 @@ import { DoznService } from '../../dozn.service';
 })
 export class DoznAppComponent implements OnInit {
   showDialog = false;
-  features = [
-    {
-      name: 'Feature A'
-    },
-    {
-      name: 'Feature B'
-    }
-  ];
-
-  flows = [
-    {
-      name: 'Flow A'
-    },
-    {
-      name: 'Flow B'
-    }
-  ];
+  features;
+  flows;
 
   constructor(
     renderer: Renderer,
     router: Router,
+    private _af: AngularFireDatabase,
     private doznService: DoznService
   ) {
+
+    this.features = this._af.list('features');
+    this.flows = this._af.list('flows');
 
     renderer.listenGlobal('document', 'click', (event: UIEvent) => {
       if (doznService.eventSession) {

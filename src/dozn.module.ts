@@ -4,16 +4,22 @@ import { NgModule, ModuleWithProviders } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
+import { AngularFireModule } from 'angularfire2';
+import { AngularFireDatabaseModule } from 'angularfire2/database';
+
 import { DoznService } from './dozn.service';
 import { DoznAppComponent } from './components/dozn-root/dozn-root.component';
 import { DialogComponent } from './components/dialog/dialog.component';
+import { environment } from './environment';
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
-    HttpModule
+    HttpModule,
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireDatabaseModule
   ],
   declarations: [
     DoznAppComponent,

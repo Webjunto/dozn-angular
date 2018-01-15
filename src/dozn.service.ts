@@ -1,13 +1,12 @@
-import { Inject } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Http } from '@angular/http';
-import { Injectable } from '@angular/core';
+
+import { AngularFireDatabase } from 'angularfire2/database';
 
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
-
-const API_URL = 'https://doznapi.herokuapp.com/api';
 
 const { version: appVersion, name: project } = require('../../package.json');
 
@@ -19,7 +18,8 @@ export class DoznService {
   public appVersion: string;
 
   constructor(
-    public http: Http
+    public http: Http,
+    private _af: AngularFireDatabase
   ) {
 
     this.doznEvents.asObservable()
@@ -27,11 +27,10 @@ export class DoznService {
     .switchMap((event: any) => {
       const payload: any = this.prepareEvtData(event);
       // Save to Backend
-      return this.http.post(`${API_URL}/Events`, payload);
+      return this._af.list('actions').push(payload);
     })
-    .map(response => response.json())
     .subscribe(data => {
-      console.log('saved event:', data);
+      console.log('saved action:', data);
     });
   }
 
@@ -48,11 +47,9 @@ export class DoznService {
       updatedAt: new Date()
     };
 
-    this.http.post(`${API_URL}/EventSessions`, newEventSession)
-      .map(response => response.json())
-      .subscribe(data => {
-        this.eventSession = data.id;
-      });
+    this._af.list('flowSessions').push(newEventSession).then(res => {
+      this.eventSession = res.key;
+    });
   }
 
   private prepareEvtData(event: any) {
