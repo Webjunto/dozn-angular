@@ -37,7 +37,7 @@ export class DoznService {
   startSession(code, feature, flow) {
     this.session = {
       device: this.getBrowserInfo(),
-      project,
+      projectId: project,
       tester: code,
       appVersion,
       featureId: feature,
@@ -84,7 +84,7 @@ export class DoznService {
     }
 
     const doznEvent: { [k: string]: any } = {
-      projectId: this.session.project,
+      projectId: this.session.projectId,
       featureId: this.session.featureId,
       flowId: this.session.flowId,
       pageId: '',  // Plugin sends the name not the ID
