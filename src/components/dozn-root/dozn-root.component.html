@@ -9,14 +9,14 @@
     <span class="custom-dropdown">
       <select name="feature" ngModel>
         <option>What feature are you testing?</option>
-        <option *ngFor="let feature of features | async" [value]="feature.$key">{{feature.$key}}</option>
+        <option *ngFor="let feature of features | async" [value]="feature.id">{{feature.name}}</option>
       </select>
     </span>
     <label>FLOW</label>
     <span class="custom-dropdown">
       <select name="flow" ngModel>
         <option>What flow are you testing?</option>
-        <option *ngFor="let flow of flows | async" [value]="flow.$key">{{flow.$key}}</option>
+        <option *ngFor="let flow of flows | async" [value]="flow.id">{{flow.name}}</option>
       </select>
     </span>
     <div class="submit-button">

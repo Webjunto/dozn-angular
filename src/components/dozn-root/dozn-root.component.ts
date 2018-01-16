@@ -1,6 +1,7 @@
 import { Component, Renderer, OnInit, Input } from '@angular/core';
 import {Router, NavigationEnd } from '@angular/router';
-import { AngularFireDatabase } from 'angularfire2/database';
+
+import { AngularFirestore } from 'angularfire2/firestore';
 
 import { DoznService } from '../../dozn.service';
 
@@ -17,30 +18,47 @@ export class DoznAppComponent implements OnInit {
   constructor(
     renderer: Renderer,
     router: Router,
-    private _af: AngularFireDatabase,
+    private _af: AngularFirestore,
     private doznService: DoznService
   ) {
 
-    this.features = this._af.list('features');
-    this.flows = this._af.list('flows');
+    this.features = this._af.collection('features').snapshotChanges().map(features => {
+      return features.map(a => {
+        const data = a.payload.doc.data();
+        data.id = a.payload.doc.id;
+        return data;
+      });
+    });
+
+    this.flows = this._af.collection('flows').snapshotChanges().map(flows => {
+      return flows.map(a => {
+        const data = a.payload.doc.data();
+        data.id = a.payload.doc.id;
+        return data;
+      });
+    });
 
     renderer.listenGlobal('document', 'click', (event: UIEvent) => {
-      if (doznService.eventSession) {
+      if (doznService.flowSession) {
         doznService.doznEvents.next(event);
        }
     });
 
     renderer.listenGlobal('document', 'input', (event: UIEvent) => {
-     if (doznService.eventSession) {
+     if (doznService.flowSession) {
       doznService.doznEvents.next(event);
      }
     });
 
     router.events.subscribe((_: NavigationEnd) => {
-      const url = _.url.replace('/', '');
-      const element = router.config.filter(e => e.path === url)[0];
-      if (element) {
-        doznService.currentViewName = element.component.name;
+      if (_.url) {
+        const url = _.url.replace('/', '');
+        const element = router.config.filter(e => e.path === url)[0];
+        if (element) {
+          doznService.currentViewName = element.component.name;
+        } else {
+          doznService.currentViewName = 'Route not found';
+        }
       }
     });
   }

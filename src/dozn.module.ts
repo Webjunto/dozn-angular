@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AngularFireModule } from 'angularfire2';
-import { AngularFireDatabaseModule } from 'angularfire2/database';
+import { AngularFirestoreModule } from 'angularfire2/firestore';
 
 import { DoznService } from './dozn.service';
 import { DoznAppComponent } from './components/dozn-root/dozn-root.component';
@@ -19,7 +19,7 @@ import { environment } from './environment';
     FormsModule,
     HttpModule,
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFireDatabaseModule
+    AngularFirestoreModule
   ],
   declarations: [
     DoznAppComponent,

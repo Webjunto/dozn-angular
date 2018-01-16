@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 
-import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFirestore } from 'angularfire2/firestore';
 
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
@@ -13,29 +13,29 @@ const { version: appVersion, name: project } = require('../../package.json');
 @Injectable()
 export class DoznService {
   public currentViewName: string;
-  public eventSession: string;
+  public flowSession: string;
   public doznEvents = new Subject();
   public appVersion: string;
+  public session;
 
   constructor(
     public http: Http,
-    private _af: AngularFireDatabase
+    private _af: AngularFirestore
   ) {
 
     this.doznEvents.asObservable()
     .distinctUntilChanged()
     .switchMap((event: any) => {
       const payload: any = this.prepareEvtData(event);
-      // Save to Backend
-      return this._af.list('actions').push(payload);
+      return this._af.collection('actions').add(payload);
     })
     .subscribe(data => {
-      console.log('saved action:', data);
+      console.log('saved event:', data);
     });
   }
 
   startSession(code, feature, flow) {
-    const newEventSession = {
+    this.session = {
       device: this.getBrowserInfo(),
       project,
       tester: code,
@@ -47,8 +47,8 @@ export class DoznService {
       updatedAt: new Date()
     };
 
-    this._af.list('flowSessions').push(newEventSession).then(res => {
-      this.eventSession = res.key;
+    this._af.collection('sessions').add(this.session).then(res => {
+      this.flowSession = res.id;
     });
   }
 
@@ -59,21 +59,16 @@ export class DoznService {
     path.splice(0, 2);
     path.forEach((el: any) => {
       let className = '';
-
-      // Remove .activated class from buttons
       if (el.nodeName.toLowerCase() === 'button') {
         className = className.replace('.activated', '');
       }
-
       actualPath.push(el.nodeName.toLowerCase() + className);
     });
 
     const cssSelectorPath = actualPath.join(' > ');
     // Find index of this specific target element, because selector can match multiples.
     const allElements = document.querySelectorAll(cssSelectorPath);
-    let nodeListIndex = 0;
-    let elementHtml;
-    let elementInnerText;
+    let nodeListIndex = 0, elementHtml, elementInnerText;
 
     for (const len = allElements.length; nodeListIndex < len; nodeListIndex++) {
       const el = allElements.item(nodeListIndex) as HTMLElement;
@@ -89,13 +84,19 @@ export class DoznService {
     }
 
     const doznEvent: { [k: string]: any } = {
-      eventSession: this.eventSession,
+      projectId: this.session.project,
+      featureId: this.session.featureId,
+      flowId: this.session.flowId,
+      pageId: '',  // Plugin sends the name not the ID
+      pageName: this.currentViewName,
+      snapshot: '',
+      cssSelector: cssSelectorPath,
+      nodeIdx: nodeListIndex,
       type: event.type,
-      page: this.currentViewName,
-      cssSelectorPath,
-      nodeListIndex,
+      flowSession: this.flowSession,
       elementHtml,
       elementInnerText,
+      createdAt: new Date()
     };
 
     if (event.type === 'input') {
