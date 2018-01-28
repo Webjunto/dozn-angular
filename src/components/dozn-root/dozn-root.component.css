@@ -1,0 +1,102 @@
+h1, h2, h4 {
+  display: flex;
+  justify-content: center;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #fff;
+}
+
+form {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #fff;
+}
+
+form label {
+  display: block;
+  font-size: 14px;
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+form .submit-button {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+}
+
+form .submit-button button {
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: none;
+  border-radius: 16px;
+  font-size: 14px;
+  color: #fff;
+  background-color: #ff9933;
+}
+
+form input {
+  border: none;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 14px;
+  background-color: #934db682;
+  padding: 8.5px;
+}
+
+/* Custom dropdown */
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.custom-dropdown select {
+  background-color: #934db682;
+  color: #fff;
+  font-size: inherit;
+  padding: .5em;
+  padding-right: 2.5em;
+  border: 0;
+  margin: 0;
+  border-radius: 3px;
+  text-indent: 0.01px;
+  -webkit-appearance: button; /* hide default arrow in chrome OSX */
+}
+
+.custom-dropdown::before,
+.custom-dropdown::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.custom-dropdown::after { /*  Custom dropdown arrow */
+  content: "\25BC";
+  height: 1em;
+  font-size: .625em;
+  line-height: 1;
+  right: 1.2em;
+  top: 50%;
+  margin-top: -.5em;
+}
+
+.custom-dropdown::before { /*  Custom dropdown arrow cover */
+  width: 2em;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 0 3px 3px 0;
+}
+
+.custom-dropdown select[disabled] {
+  color: rgba(0,0,0,.3);
+}
+
+.custom-dropdown select[disabled]::after {
+  color: rgba(0,0,0,.1);
+}
+
+.custom-dropdown::after {
+  color: rgb(255, 255, 255);
+}

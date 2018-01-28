@@ -1,0 +1,42 @@
+{
+  "name": "@webjunto/dozn-angular",
+  "version": "0.0.1",
+  "description": "A tool for automatically generating E2E tests for your ionic application",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf aot dist && ngc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "angular",
+    "ionic",
+    "testing",
+    "e2e"
+  ],
+  "author": "Webjunto, LLC.",
+  "license": "MIT",
+  "dependencies": {
+    "@angular/animations": "5.0.3",
+    "@angular/common": "5.0.3",
+    "@angular/compiler": "5.0.3",
+    "@angular/core": "5.0.3",
+    "@angular/forms": "5.0.3",
+    "@angular/http": "5.0.3",
+    "@angular/platform-browser": "5.0.3",
+    "@angular/platform-browser-dynamic": "5.0.3",
+    "@angular/router": "5.0.3",
+    "core-js": "^2.4.1",
+    "rxjs": "5.5.2",
+    "zone.js": "0.8.18",
+    "angularfire2": "^5.0.0-rc.0",
+    "firebase": "^4.8.1"
+  },
+  "devDependencies": {
+    "@angular/cli": "1.6.4",
+    "@angular/compiler-cli": "5.0.3",
+    "@types/node": "~6.0.60",
+    "typescript": "2.4.2"
+  }
+}
