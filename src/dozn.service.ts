@@ -1,27 +1,33 @@
-import { Inject, Injectable } from '@angular/core';
 import { Http } from '@angular/http';
-
-import { AngularFirestore } from 'angularfire2/firestore';
-
+import { Injectable, Inject } from '@angular/core';
+import { AngularFirestore, docChanges } from 'angularfire2/firestore';
+import { DOZN_CONFIG, IDoznConfig } from './utils';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 
-const { version: appVersion, name: project } = require('../../package.json');
+declare var require: any;
+const { version: appVersion, name: project } = require('../../../../package.json');
 
 @Injectable()
 export class DoznService {
   public currentViewName: string;
-  public flowSession: string;
+  public sessionId: string;
   public doznEvents = new Subject();
   public appVersion: string;
-  public session;
+  public projectName;
+  private session;
+  private apiKey;
 
   constructor(
     public http: Http,
-    private _af: AngularFirestore
+    private _af: AngularFirestore,
+    @Inject(DOZN_CONFIG) config: IDoznConfig
   ) {
+
+    this.apiKey = config.apiKey;
+    this.projectName = project;
 
     this.doznEvents.asObservable()
     .distinctUntilChanged()
@@ -34,10 +40,27 @@ export class DoznService {
     });
   }
 
+  createFeature(name) {
+    this._af.collection('features').add({
+      name,
+      projectId: project
+    });
+  }
+
+  createFlow(name, featureId) {
+    this._af.collection('flows').add({
+      name,
+      projectId: project,
+      featureId,
+      testDescription: ''
+    });
+  }
+
   startSession(code, feature, flow) {
     this.session = {
+      apiKey: this.apiKey,
       device: this.getBrowserInfo(),
-      projectId: project,
+      projectId : project,
       tester: code,
       appVersion,
       featureId: feature,
@@ -48,15 +71,15 @@ export class DoznService {
     };
 
     this._af.collection('sessions').add(this.session).then(res => {
-      this.flowSession = res.id;
+      this.sessionId = res.id;
     });
   }
 
   private prepareEvtData(event: any) {
     const actualPath: any[] = [];
-
     const path = event.path.reverse();
-    path.splice(0, 2);
+
+    path.splice(0, 6);
     path.forEach((el: any) => {
       let className = '';
       if (el.nodeName.toLowerCase() === 'button') {
@@ -70,7 +93,7 @@ export class DoznService {
     const allElements = document.querySelectorAll(cssSelectorPath);
     let nodeListIndex = 0, elementHtml, elementInnerText;
 
-    for (const len = allElements.length; nodeListIndex < len; nodeListIndex++) {
+    for (let len = allElements.length; nodeListIndex < len; nodeListIndex++) {
       const el = allElements.item(nodeListIndex) as HTMLElement;
       if (el === event.target) {
         try {
@@ -87,19 +110,19 @@ export class DoznService {
       projectId: this.session.projectId,
       featureId: this.session.featureId,
       flowId: this.session.flowId,
-      pageId: '',  // Plugin sends the name not the ID
+      pageId: '',
       pageName: this.currentViewName,
-      snapshot: '',
+      snapshot: document.getElementsByTagName('html')[0].innerHTML,
       cssSelector: cssSelectorPath,
       nodeIdx: nodeListIndex,
       type: event.type,
-      flowSession: this.flowSession,
+      sessionId: this.sessionId,
       elementHtml,
       elementInnerText,
       createdAt: new Date()
     };
 
-    if (event.type === 'input') {
+    if(event.type === 'input') {
       doznEvent.fieldType = event.target.type;
       doznEvent.fieldValue = event.target.value;
     }

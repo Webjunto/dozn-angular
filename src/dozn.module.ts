@@ -10,7 +10,9 @@ import { AngularFirestoreModule } from 'angularfire2/firestore';
 import { DoznService } from './dozn.service';
 import { DoznAppComponent } from './components/dozn-root/dozn-root.component';
 import { DialogComponent } from './components/dialog/dialog.component';
+import { AutocompleteComponent } from './components/autocomplete/autocomplete.component';
 import { environment } from './environment';
+import { DOZN_CONFIG, IDoznConfig } from './utils';
 
 @NgModule({
   imports: [
@@ -23,19 +25,21 @@ import { environment } from './environment';
   ],
   declarations: [
     DoznAppComponent,
-    DialogComponent
+    DialogComponent,
+    AutocompleteComponent
   ],
   exports: [
     DoznAppComponent
   ],
 })
 export class DoznModule {
-  static forRoot(): ModuleWithProviders {
+  static forRoot(doznConfig: IDoznConfig): ModuleWithProviders {
     return {
       ngModule: DoznModule,
       providers: [
+        { provide: DOZN_CONFIG, useValue: doznConfig },
         DoznService
-      ],
+      ]
     };
   }
 }
