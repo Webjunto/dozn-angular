@@ -11,7 +11,6 @@ import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
   styleUrls: ['dozn-root.component.css']
 })
 export class DoznAppComponent implements OnInit {
-  projectId: string;
   data = {
     userProfiles: '',
     features: '',
@@ -26,8 +25,6 @@ export class DoznAppComponent implements OnInit {
     private doznService: DoznService,
     private http: Http
   ) {
-
-    this.projectId = this.doznService.apiKey;
 
     renderer.listenGlobal('document', 'click', (event: UIEvent) => {
       if (doznService.sessionId) {

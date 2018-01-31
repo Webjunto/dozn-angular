@@ -5,6 +5,7 @@ import { Http } from '@angular/http';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/combineLatest';
 
+import { DoznService } from '../../dozn.service';
  import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
 
 @Component({
@@ -49,7 +50,6 @@ export class AutocompleteComponent implements OnInit {
   @ViewChild('myInput') searchInput: NgModel;
   @Input('label') label: string;
   @Input('type') type: string;
-  @Input('project') project: string;
   @Output() autocompleteSelected: EventEmitter<{}> = new EventEmitter<{}>();
   @Output() create: EventEmitter<{}> = new EventEmitter<{}>();
 
@@ -59,16 +59,16 @@ export class AutocompleteComponent implements OnInit {
   items;
   existItems = true;
 
-  constructor(private http: Http) {
+  constructor(private http: Http, private _dozn: DoznService) {
   }
 
   getUrl() {
     if (this.type === 'companyUsers') {
-      return GET_COMPANY_USERS;
+      return GET_COMPANY_USERS + this._dozn.apiKey;
     } else if (this.type === 'features'){
-      return GET_FEATURES;
+      return GET_FEATURES + this._dozn.apiKey;
     } else {
-      return GET_FLOWS;
+      return GET_FLOWS + this._dozn.apiKey;
     }
   }
 
