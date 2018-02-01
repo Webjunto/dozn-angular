@@ -2,23 +2,24 @@ import { Component, OnInit, Input,  Output, EventEmitter, ViewChild } from '@ang
 import { NgModel } from '@angular/forms';
 import { Http } from '@angular/http';
 
-import { Subject } from 'rxjs/Subject';
-import 'rxjs/add/operator/combineLatest';
+import 'rxjs/add/operator/map';
 
 import { DoznService } from '../../dozn.service';
- import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
+import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
 
 @Component({
   selector: 'auto-complete',
   template: `
   <div>
     <label>{{label}}</label>
-    <input #myInput="ngModel" [(ngModel)]="name" type="text" placeholder="{{placeholder}}" class="input">
-    <div *ngFor="let item of items | async" (click)="selectItem(item)">
-        <p>{{item?.name}}</p>
+    <input type="text" [(ngModel)]="name" placeholder="{{placeholder}}" class="input">
+    <div *ngIf="name.length > 0 && !selected">
+      <div *ngFor="let item of items | filter:name" (click)="selectItem(item)">
+          <p>{{item?.name}}</p>
+      </div>
     </div>
-    <div *ngIf="name.length > 0 && !existItems" (click)="onCreate(name)">
-        <p>Create {{ name }} {{ type}}</p>
+    <div *ngIf="name.length > 0 && !selected && (items | filter:name).length === 0" (click)="onCreate(name)">
+        <p>Create {{name}} {{type}}</p>
     </div>
   </div>
   `,
@@ -47,25 +48,23 @@ import { DoznService } from '../../dozn.service';
 
 })
 export class AutocompleteComponent implements OnInit {
-  @ViewChild('myInput') searchInput: NgModel;
   @Input('label') label: string;
   @Input('type') type: string;
   @Output() autocompleteSelected: EventEmitter<{}> = new EventEmitter<{}>();
   @Output() create: EventEmitter<{}> = new EventEmitter<{}>();
 
-  snapshot$;
+  items = [];
   name = '';
   placeholder = '';
-  items;
-  existItems = true;
+  selected = false;
 
   constructor(private http: Http, private _dozn: DoznService) {
   }
 
   getUrl() {
-    if (this.type === 'companyUsers') {
+    if (this.type === 'user') {
       return GET_COMPANY_USERS + this._dozn.apiKey;
-    } else if (this.type === 'features'){
+    } else if (this.type === 'feature'){
       return GET_FEATURES + this._dozn.apiKey;
     } else {
       return GET_FLOWS + this._dozn.apiKey;
@@ -74,25 +73,20 @@ export class AutocompleteComponent implements OnInit {
 
   ngOnInit() {
     this.placeholder = 'What ' + this.type + ' do you want?';
-    this.snapshot$ = this.http.get(this.getUrl());
 
-    this.items = this.searchInput.valueChanges
-    .combineLatest(this.snapshot$)
-    .subscribe(([searchInput, dataArr]) => {
-      if (!searchInput) return [];
-      const filteredArr = dataArr.filter(item => item.name.startsWith(searchInput));
-      this.existItems = filteredArr.length > 0 ? true : false;
-      return filteredArr;
+    this.http.get(this.getUrl()).subscribe(response => {
+      this.items = response.json();
     });
   }
 
   onCreate(name) {
+    this.selected = true;
     this.create.emit({name, type:this.type});
   }
 
   selectItem(item) {
     this.name = item.name;
-    this.existItems = false;
+    this.selected = true;
     this.autocompleteSelected.emit({item, type: this.type});
   }
 }

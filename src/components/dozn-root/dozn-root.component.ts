@@ -12,9 +12,9 @@ import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
 })
 export class DoznAppComponent implements OnInit {
   data = {
-    userProfiles: '',
-    features: '',
-    flows: ''
+    user: '',
+    feature: '',
+    flow: ''
   };
 
   showDialog: boolean = false;
@@ -22,19 +22,19 @@ export class DoznAppComponent implements OnInit {
   constructor(
     renderer: Renderer,
     router: Router,
-    private doznService: DoznService,
+    private _dozn: DoznService,
     private http: Http
   ) {
 
     renderer.listenGlobal('document', 'click', (event: UIEvent) => {
-      if (doznService.sessionId) {
-        doznService.doznEvents.next(event);
+      if (_dozn.sessionId) {
+        _dozn.doznEvents.next(event);
        }
     });
 
     renderer.listenGlobal('document', 'input', (event: UIEvent) => {
-      if (doznService.sessionId) {
-        doznService.doznEvents.next(event);
+      if (_dozn.sessionId) {
+        _dozn.doznEvents.next(event);
        }
     });
 
@@ -43,9 +43,9 @@ export class DoznAppComponent implements OnInit {
         const url = _.url.replace('/', '');
         const element = router.config.filter(e => e.path === url)[0];
         if (element) {
-          doznService.currentViewName = element.component.name;
+          _dozn.currentViewName = element.component.name;
         } else {
-          doznService.currentViewName = 'Route not found';
+          _dozn.currentViewName = 'Route not found';
         }
       }
     });
@@ -56,18 +56,24 @@ export class DoznAppComponent implements OnInit {
   }
 
   onCreate(event) {
-    if (event.type === 'features') {
-      this.doznService.createFeature(event.name);
-    } else if (event.type === 'flows') {
-      this.doznService.createFlow(event.name, this.data.features);
+    if (event.type === 'feature') {
+      this._dozn.createFeature(event.name)
+      .subscribe(id => {
+        this.data[event.type] = id;
+      });
+    } else if (event.type === 'flow') {
+      this._dozn.createFlow(event.name, this.data.feature)
+      .subscribe(id => {
+        this.data[event.type] = id;
+      });
     } else {
       return;
     }
   }
 
   onSubmit() {
-    if (this.data.userProfiles && this.data.features && this.data.flows) {
-      this.doznService.startSession(this.data.userProfiles, this.data.features, this.data.flows);
+    if (this.data.user && this.data.feature && this.data.flow) {
+      this._dozn.startSession(this.data.user, this.data.feature, this.data.flow);
       this.showDialog = !this.showDialog;
     }
   }

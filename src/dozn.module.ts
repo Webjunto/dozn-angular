@@ -9,6 +9,7 @@ import { DoznAppComponent } from './components/dozn-root/dozn-root.component';
 import { DialogComponent } from './components/dialog/dialog.component';
 import { AutocompleteComponent } from './components/autocomplete/autocomplete.component';
 import { DOZN_CONFIG, IDoznConfig } from './utils';
+import { FilterPipe } from './components/autocomplete/filter-pipe';
 
 @NgModule({
   imports: [
@@ -20,7 +21,8 @@ import { DOZN_CONFIG, IDoznConfig } from './utils';
   declarations: [
     DoznAppComponent,
     DialogComponent,
-    AutocompleteComponent
+    AutocompleteComponent,
+    FilterPipe
   ],
   exports: [
     DoznAppComponent
