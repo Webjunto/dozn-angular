@@ -110,17 +110,13 @@ export class DoznAppComponent implements OnInit {
     this.data[event.type] = event.item.id;
   }
 
-  onCreate(event) {
+  async onCreate(event) {
     if (event.type === 'feature') {
-      this._dozn.createFeature(event.name)
-      .subscribe(id => {
-        this.data[event.type] = id;
-      });
+      const feature = await this._dozn.createFeature(event.name).toPromise();
+      this.data[event.type] = feature.text();
     } else if (event.type === 'flow') {
-      this._dozn.createFlow(event.name, this.data.feature)
-      .subscribe(id => {
-        this.data[event.type] = id;
-      });
+      const flow = await this._dozn.createFlow(event.name, this.data.feature).toPromise();
+      this.data[event.type] = flow.text();
     } else {
       return;
     }

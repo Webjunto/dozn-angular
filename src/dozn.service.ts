@@ -53,7 +53,7 @@ export class DoznService {
     });
   }
 
-  startSession(code, feature, flow) {
+  async startSession(code, feature, flow) {
     this.session = {
       apiKey: this.apiKey,
       device: this.getBrowserInfo(),
@@ -67,9 +67,8 @@ export class DoznService {
       updatedAt: new Date()
     };
 
-    this.http.post(POST_SESSION, this.session).subscribe((id: any) => {
-      this.sessionId = id;
-    });
+    const session = await this.http.post(POST_SESSION, this.session).toPromise();
+    this.sessionId = session.text();
   }
 
   private prepareEvtData(event: any) {

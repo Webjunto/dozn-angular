@@ -71,12 +71,11 @@ export class AutocompleteComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.placeholder = 'What ' + this.type + ' do you want?';
 
-    this.http.get(this.getUrl()).subscribe(response => {
-      this.items = response.json();
-    });
+    const items = await this.http.get(this.getUrl()).toPromise();
+    this.items = items.json();
   }
 
   onCreate(name) {
