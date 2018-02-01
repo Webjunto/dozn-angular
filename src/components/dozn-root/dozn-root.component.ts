@@ -7,8 +7,63 @@ import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
 
 @Component({
   selector: 'app-dozn',
-  templateUrl: 'dozn-root.component.html',
-  styleUrls: ['dozn-root.component.css']
+  template: `
+  <app-dialog [(visible)]="showDialog">
+    <h1>Welcome to</h1>
+    <h2>Dozn</h2>
+    <h4>Intro text</h4>
+    <form>
+      <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT USER" type="user"></auto-complete>
+      <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT FEATURE" type="feature"></auto-complete>
+      <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT FLOW" type="flow"></auto-complete>
+      <div class="submit-button">
+        <button type="submit" (click)="onSubmit()">Begin Session</button>
+      </div>
+    </form>
+  </app-dialog>
+  `,
+  styles: [
+    `h1, h2, h4 {
+      display: flex;
+      justify-content: center;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+    }`,
+    `form {
+      font-family: Arial, Helvetica, sans-serif;
+      color: #fff;
+    }`,
+    `form label {
+      display: block;
+      font-size: 14px;
+      margin-top: 20px;
+      margin-bottom: 5px;
+    }`,
+    `form .submit-button {
+      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+    }`,
+    `form .submit-button button {
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border: none;
+      border-radius: 16px;
+      font-size: 14px;
+      color: #fff;
+      background-color: #ff9933;
+    }`,
+    `form input {
+      border: none;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 14px;
+      background-color: #934db682;
+      padding: 8.5px;
+    }`
+  ]
 })
 export class DoznAppComponent implements OnInit {
   data = {
