@@ -22,11 +22,11 @@ This allows us to present your tests to you in a way you'll understand, instead 
 * In your app, 
   * ```npm install @webjunto/dozn-angular --save-dev```
 * In your app.module.ts, 
-  * ```import { DoznModule, DoznApp } from '@webjunto/dozn-angular';```
+  * ```import { DoznModule } from '@webjunto/dozn-angular';```
 * Under "Imports", declare Dozn Module with your API Key 
   * ```DoznModule.forRoot({apiKey: 'MYAPIKEY'})```
-* Bootstrap your app with Dozn 
-  * ```bootstrap:[DoznApp]```
+* Add in your root page
+  * ```<app-dozn></app-dozn>```
 * Build/Run your app, and watch the your app populate on Dozn!
 
 ## Steps to publish
