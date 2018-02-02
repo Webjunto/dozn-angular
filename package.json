@@ -1,6 +1,6 @@
 {
   "name": "@webjunto/dozn-angular",
-  "version": "0.0.1",
+  "version": "1.1.1",
   "description": "Dozn is a tool for automatically generating E2E tests for your angular application",
   "main": "src/index.js",
   "typings": "src/index.d.ts",
