@@ -5,7 +5,7 @@ import { Http } from '@angular/http';
 import 'rxjs/add/operator/map';
 
 import { DoznService } from '../../dozn.service';
-import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
+import { environment } from '../../environment';
 
 @Component({
   selector: 'auto-complete',
@@ -63,11 +63,11 @@ export class AutocompleteComponent implements OnInit {
 
   getUrl() {
     if (this.type === 'user') {
-      return GET_COMPANY_USERS + this._dozn.apiKey;
+      return environment.firebase.GET_COMPANY_USERS + this._dozn.apiKey;
     } else if (this.type === 'feature'){
-      return GET_FEATURES + this._dozn.apiKey;
+      return environment.firebase.GET_FEATURES + this._dozn.apiKey;
     } else {
-      return GET_FLOWS + this._dozn.apiKey;
+      return environment.firebase.GET_FLOWS + this._dozn.apiKey;
     }
   }
 

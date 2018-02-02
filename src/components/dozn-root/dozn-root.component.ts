@@ -3,7 +3,6 @@ import {Router, NavigationEnd } from '@angular/router';
 import { Http } from '@angular/http';
 
 import { DoznService } from '../../dozn.service';
-import {GET_COMPANY_USERS, GET_FEATURES,  GET_FLOWS} from '../../utils';
 
 @Component({
   selector: 'app-dozn',
