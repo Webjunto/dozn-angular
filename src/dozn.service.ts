@@ -1,43 +1,63 @@
-import { Inject, Injectable } from '@angular/core';
-import { Http } from '@angular/http';
-
-import { AngularFirestore } from 'angularfire2/firestore';
+import { Injectable, Inject } from '@angular/core';
+import { Http, Response } from '@angular/http';
 
 import { Subject } from 'rxjs/Subject';
-import 'rxjs/add/operator/map';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 
-const { version: appVersion, name: project } = require('../../package.json');
+import { DOZN_CONFIG, IDoznConfig, POST_SESSION, POST_ACTION, POST_FEATURE, POST_FLOW } from './utils';
+
+declare var require: any;
+const { version: appVersion } = require('../../../../package.json');
 
 @Injectable()
 export class DoznService {
-  public currentViewName: string;
-  public flowSession: string;
+  private session;
+
   public doznEvents = new Subject();
+  public currentViewName: string;
+  public sessionId: string;
   public appVersion: string;
-  public session;
+  public apiKey: string;
 
   constructor(
     public http: Http,
-    private _af: AngularFirestore
+    @Inject(DOZN_CONFIG) config: IDoznConfig
   ) {
 
+    this.apiKey = config.apiKey;
+
     this.doznEvents.asObservable()
-    .distinctUntilChanged()
-    .switchMap((event: any) => {
+    .subscribe(event => {
       const payload: any = this.prepareEvtData(event);
-      return this._af.collection('actions').add(payload);
-    })
-    .subscribe(data => {
-      console.log('saved event:', data);
+      this.http.post(POST_ACTION, payload).subscribe(data => {
+        console.log('saved event:', data);
+      });
     });
   }
 
-  startSession(code, feature, flow) {
+  createFeature(name) {
+    return this.http.post(POST_FEATURE, {
+      name,
+      projectId: this.apiKey
+    });
+  }
+
+  createFlow(name, featureId) {
+    return this.http.post(POST_FLOW, {
+      name,
+      projectId: this.apiKey,
+      featureId,
+      testDescription: ''
+    });
+  }
+
+  async startSession(code, feature, flow) {
     this.session = {
+      apiKey: this.apiKey,
       device: this.getBrowserInfo(),
-      projectId: project,
+      projectId : this.apiKey,
       tester: code,
       appVersion,
       featureId: feature,
@@ -47,16 +67,15 @@ export class DoznService {
       updatedAt: new Date()
     };
 
-    this._af.collection('sessions').add(this.session).then(res => {
-      this.flowSession = res.id;
-    });
+    const session = await this.http.post(POST_SESSION, this.session).toPromise();
+    this.sessionId = session.text();
   }
 
   private prepareEvtData(event: any) {
     const actualPath: any[] = [];
-
     const path = event.path.reverse();
-    path.splice(0, 2);
+
+    path.splice(0, 6);
     path.forEach((el: any) => {
       let className = '';
       if (el.nodeName.toLowerCase() === 'button') {
@@ -70,7 +89,7 @@ export class DoznService {
     const allElements = document.querySelectorAll(cssSelectorPath);
     let nodeListIndex = 0, elementHtml, elementInnerText;
 
-    for (const len = allElements.length; nodeListIndex < len; nodeListIndex++) {
+    for (let len = allElements.length; nodeListIndex < len; nodeListIndex++) {
       const el = allElements.item(nodeListIndex) as HTMLElement;
       if (el === event.target) {
         try {
@@ -87,19 +106,19 @@ export class DoznService {
       projectId: this.session.projectId,
       featureId: this.session.featureId,
       flowId: this.session.flowId,
-      pageId: '',  // Plugin sends the name not the ID
+      pageId: '',
       pageName: this.currentViewName,
-      snapshot: '',
+      snapshot: document.getElementsByTagName('html')[0].innerHTML,
       cssSelector: cssSelectorPath,
       nodeIdx: nodeListIndex,
       type: event.type,
-      flowSession: this.flowSession,
+      sessionId: this.sessionId,
       elementHtml,
       elementInnerText,
       createdAt: new Date()
     };
 
-    if (event.type === 'input') {
+    if(event.type === 'input') {
       doznEvent.fieldType = event.target.type;
       doznEvent.fieldValue = event.target.value;
     }
