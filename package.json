@@ -1,12 +1,12 @@
 {
   "name": "@webjunto/dozn-angular",
-  "version": "1.1.3",
+  "version": "1.2.0",
   "description": "Dozn is a tool for automatically generating E2E tests for your angular application",
   "main": "src/index.js",
   "typings": "src/index.d.ts",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "rm -rf aot dist && ngc && copyfiles package.json dist/",
+    "build": "rm -rf dist && ngc && copyfiles package.json dist/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

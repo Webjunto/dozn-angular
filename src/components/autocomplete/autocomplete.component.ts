@@ -1,11 +1,10 @@
-import { Component, OnInit, Input,  Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, Inject } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Http } from '@angular/http';
 
 import 'rxjs/add/operator/map';
 
 import { DoznService } from '../../dozn.service';
-import { environment } from '../../environment';
 
 @Component({
   selector: 'auto-complete',
@@ -63,11 +62,11 @@ export class AutocompleteComponent implements OnInit {
 
   getUrl() {
     if (this.type === 'user') {
-      return environment.firebase.GET_COMPANY_USERS + this._dozn.apiKey;
+      return this._dozn.environment.firebase.GET_COMPANY_USERS + this._dozn.apiKey;
     } else if (this.type === 'feature'){
-      return environment.firebase.GET_FEATURES + this._dozn.apiKey;
+      return this._dozn.environment.firebase.GET_FEATURES + this._dozn.apiKey;
     } else {
-      return environment.firebase.GET_FLOWS + this._dozn.apiKey;
+      return this._dozn.environment.firebase.GET_FLOWS + this._dozn.apiKey;
     }
   }
 
