@@ -1,5 +1,5 @@
 import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, Inject } from '@angular/core';
-import { NgModel } from '@angular/forms';
+import { NgModel, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 
 import 'rxjs/add/operator/map';
@@ -10,16 +10,22 @@ import { DoznService } from '../../dozn.service';
   selector: 'auto-complete',
   template: `
   <div>
-    <label>{{label}}</label>
-    <input type="text" [(ngModel)]="name" placeholder="{{placeholder}}" class="input">
-    <div *ngIf="name.length > 0 && !selected">
-      <div *ngFor="let item of items | filter:name" (click)="selectItem(item)">
-          <p>{{item?.name}}</p>
+    <form [formGroup]="autocompleteForm">
+      <label>{{label}}</label>
+      <input type="text" [(ngModel)]="name" formControlName="name" placeholder="{{placeholder}}" class="input">
+      <div *ngIf="autocompleteForm.controls.name.errors?.maxlength?.requiredLength">
+        Not valid, must be at max {{autocompleteForm.controls.name.errors.maxlength.requiredLength}} characters long.
       </div>
-    </div>
-    <div *ngIf="name.length > 0 && !selected && (items | filter:name).length === 0" (click)="onCreate(name)">
-        <p>Create {{name}} {{type}}</p>
-    </div>
+      <div *ngIf="name.length > 0 && !selected">
+        <div *ngFor="let item of items | filter:name" (click)="selectItem(item)">
+            <p>{{item?.name}}</p>
+        </div>
+      </div>
+      <div *ngIf="name.length > 0 && !selected && (items | filter:name).length === 0 && !autocompleteForm.controls.name.errors?.maxlength?.requiredLength"
+            (click)="onCreate(name)">
+          <p>Create {{name}} {{type}}</p>
+      </div>
+    </form>
   </div>
   `,
   styles: [
@@ -52,12 +58,24 @@ export class AutocompleteComponent implements OnInit {
   @Output() autocompleteSelected: EventEmitter<{}> = new EventEmitter<{}>();
   @Output() create: EventEmitter<{}> = new EventEmitter<{}>();
 
+  autocompleteForm: FormGroup;
+
   items = [];
   name = '';
   placeholder = '';
   selected = false;
 
-  constructor(private http: Http, private _dozn: DoznService) {
+  constructor(private http: Http, private _dozn: DoznService, formBuilder: FormBuilder) {
+    this.placeholder = 'What ' + this.type + ' do you want?';
+    this.autocompleteForm = formBuilder.group({
+      'name': [
+        this.name,
+        Validators.compose([
+          Validators.required,
+          Validators.maxLength(30)
+        ])
+      ]
+    });
   }
 
   getUrl() {
@@ -71,20 +89,22 @@ export class AutocompleteComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.placeholder = 'What ' + this.type + ' do you want?';
-
     const items = await this.http.get(this.getUrl()).toPromise();
     this.items = items.json();
   }
 
   onCreate(name) {
-    this.selected = true;
-    this.create.emit({name, type:this.type});
+    if (this.autocompleteForm.controls.name.valid) {
+      this.selected = true;
+      this.create.emit({name, type:this.type});
+    }
   }
 
   selectItem(item) {
-    this.name = item.name;
-    this.selected = true;
-    this.autocompleteSelected.emit({item, type: this.type});
+    if (this.autocompleteForm.controls.name.valid) {
+      this.name = item.name;
+      this.selected = true;
+      this.autocompleteSelected.emit({item, type: this.type});
+    }
   }
 }
