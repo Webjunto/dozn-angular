@@ -3,6 +3,7 @@ import {Router, NavigationEnd } from '@angular/router';
 import { Http } from '@angular/http';
 
 import { DoznService } from '../../dozn.service';
+import { DoznIonic } from '../../models/models';
 
 @Component({
   selector: 'app-dozn',
@@ -11,14 +12,14 @@ import { DoznService } from '../../dozn.service';
     <h1>Welcome to</h1>
     <h2>Dozn</h2>
     <h4>Intro text</h4>
-    <form>
+    <div class="form">
       <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT USER" type="user"></auto-complete>
       <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT FEATURE" type="feature"></auto-complete>
       <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT FLOW" type="flow"></auto-complete>
       <div class="submit-button">
-        <button type="submit" [disabled]="isDisabledBeginSession() (click)="onSubmit()">Begin Session</button>
+        <button type="submit" [disabled]="isDisabledBeginSession()" (click)="onSubmit()">Begin Session</button>
       </div>
-    </form>
+    </div>
   </app-dialog>
   `,
   styles: [
@@ -28,22 +29,22 @@ import { DoznService } from '../../dozn.service';
       font-family: Arial, Helvetica, sans-serif;
       color: #fff;
     }`,
-    `form {
+    `.form {
       font-family: Arial, Helvetica, sans-serif;
       color: #fff;
     }`,
-    `form label {
+    `.form label {
       display: block;
       font-size: 14px;
       margin-top: 20px;
       margin-bottom: 5px;
     }`,
-    `form .submit-button {
+    `.form .submit-button {
       margin-top: 50px;
       display: flex;
       justify-content: center;
     }`,
-    `form .submit-button button {
+    `.form .submit-button button {
       padding-left: 50px;
       padding-right: 50px;
       padding-top: 10px;
@@ -54,7 +55,7 @@ import { DoznService } from '../../dozn.service';
       color: #fff;
       background-color: #ff9933;
     }`,
-    `form input {
+    `.form input {
       border: none;
       border-radius: 3px;
       color: #fff;
@@ -65,7 +66,7 @@ import { DoznService } from '../../dozn.service';
   ]
 })
 export class DoznAppComponent implements OnInit {
-  data = {
+  sessionData: DoznIonic.SessionOptions = {
     user: '',
     feature: '',
     flow: ''
@@ -105,24 +106,24 @@ export class DoznAppComponent implements OnInit {
     });
   }
 
-  onSelect(event) {
-    this.data[event.type] = event.item.id;
+  onSelect(event: DoznIonic.SelectOption) {
+    this.sessionData[event.type] = event.id;
   }
 
-  async onCreate(event) {
+  async onCreate(event: DoznIonic.CreateOption) {
     if (event.type === 'feature') {
       const feature = await this._dozn.createFeature(event.name).toPromise();
-      this.data[event.type] = feature.text();
+      this.sessionData[event.type] = feature.text();
     } else if (event.type === 'flow') {
-      const flow = await this._dozn.createFlow(event.name, this.data.feature).toPromise();
-      this.data[event.type] = flow.text();
+      const flow = await this._dozn.createFlow(event.name, this.sessionData.feature).toPromise();
+      this.sessionData[event.type] = flow.text();
     } else {
       return;
     }
   }
 
   isDisabledBeginSession() {
-    if(this.data.feature === '' || this.data.flow === '' || this.data.user === '') {
+    if(this.sessionData.feature === '' || this.sessionData.flow === '' || this.sessionData.user === '') {
       return true;
     } else {
       return false;
@@ -130,8 +131,8 @@ export class DoznAppComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.data.user && this.data.feature && this.data.flow) {
-      this._dozn.startSession(this.data.user, this.data.feature, this.data.flow);
+    if (this.sessionData.user && this.sessionData.feature && this.sessionData.flow) {
+      this._dozn.startSession(this.sessionData.user, this.sessionData.feature, this.sessionData.flow);
       this.showDialog = !this.showDialog;
     }
   }

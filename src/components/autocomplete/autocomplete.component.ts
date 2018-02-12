@@ -1,10 +1,9 @@
 import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, Inject } from '@angular/core';
 import { NgModel, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
-
-import 'rxjs/add/operator/map';
-
 import { DoznService } from '../../dozn.service';
+import { DoznIonic } from '../../models/models';
+import 'rxjs/add/operator/map';
 
 @Component({
   selector: 'auto-complete',
@@ -12,18 +11,29 @@ import { DoznService } from '../../dozn.service';
   <div>
     <form [formGroup]="autocompleteForm">
       <label>{{label}}</label>
-      <input type="text" [(ngModel)]="name" formControlName="name" placeholder="{{placeholder}}" class="input">
+      <input type="text" [(ngModel)]="name" formControlName="name" placeholder="What {{type}} do you want?" class="input" (input)="onType($event.target.value)">
+
       <div *ngIf="autocompleteForm.controls.name.errors?.maxlength?.requiredLength">
-        Not valid, must be at max {{autocompleteForm.controls.name.errors.maxlength.requiredLength}} characters long.
+      <p>Not valid, must be at max</p>
+      <p>{{autocompleteForm.controls.name.errors.maxlength.requiredLength}} characters long</p>
       </div>
+      <div *ngIf="autocompleteForm.controls.name.hasError('required') && autocompleteForm.controls.name.touched">
+      <p>This name can't be empty</p>
+      </div>
+
       <div *ngIf="name.length > 0 && !selected">
-        <div *ngFor="let item of items | filter:name" (click)="selectItem(item)">
+        <div *ngFor="let item of items | filter:name" (click)="onSelectOption(item)">
             <p>{{item?.name}}</p>
         </div>
       </div>
-      <div *ngIf="name.length > 0 && !selected && (items | filter:name).length === 0 && !autocompleteForm.controls.name.errors?.maxlength?.requiredLength"
-            (click)="onCreate(name)">
-          <p>Create {{name}} {{type}}</p>
+
+      <div *ngIf="name.length > 0 &&
+                  !isUserSelect &&
+                  !selected && (items | filter:name).length === 0 &&
+                  !autocompleteForm.controls.name.errors?.maxlength?.requiredLength &&
+                  !autocompleteForm.controls.name.hasError('required')"
+            (click)="onCreateOption(name)">
+          <p>Create {{ (name.length>9)? (name | slice:0:8)+'...':(name) }} {{type}}</p>
       </div>
     </form>
   </div>
@@ -42,7 +52,6 @@ import { DoznService } from '../../dozn.service';
       font-size: 14px;
       background-color: #934db6;
       padding: 8.5px;
-      width: 100%;
 
       &::-webkit-input-placeholder { color: white; opacity: 0.6; }
       &::-moz-placeholder { color: white; opacity: 0.6; }
@@ -55,21 +64,20 @@ import { DoznService } from '../../dozn.service';
 export class AutocompleteComponent implements OnInit {
   @Input('label') label: string;
   @Input('type') type: string;
-  @Output() autocompleteSelected: EventEmitter<{}> = new EventEmitter<{}>();
-  @Output() create: EventEmitter<{}> = new EventEmitter<{}>();
+  @Output() autocompleteSelected: EventEmitter<DoznIonic.SelectOption> = new EventEmitter<DoznIonic.SelectOption>();
+  @Output() create: EventEmitter<DoznIonic.CreateOption> = new EventEmitter<DoznIonic.CreateOption>();
 
   autocompleteForm: FormGroup;
-
-  items = [];
-  name = '';
-  placeholder = '';
-  selected = false;
+  isUserSelect: boolean;
+  items: Array<DoznIonic.ItemOption> = [];
+  selected: boolean = false;
+  name: string = '';
 
   constructor(private http: Http, private _dozn: DoznService, formBuilder: FormBuilder) {
-    this.placeholder = 'What ' + this.type + ' do you want?';
+    this.isUserSelect = this.type === 'user' ? true : false;
     this.autocompleteForm = formBuilder.group({
       'name': [
-        this.name,
+        '',
         Validators.compose([
           Validators.required,
           Validators.maxLength(30)
@@ -78,33 +86,52 @@ export class AutocompleteComponent implements OnInit {
     });
   }
 
-  getUrl() {
-    if (this.type === 'user') {
-      return this._dozn.environment.firebase.GET_COMPANY_USERS + this._dozn.apiKey;
-    } else if (this.type === 'feature'){
-      return this._dozn.environment.firebase.GET_FEATURES + this._dozn.apiKey;
-    } else {
-      return this._dozn.environment.firebase.GET_FLOWS + this._dozn.apiKey;
-    }
-  }
-
   async ngOnInit() {
-    const items = await this.http.get(this.getUrl()).toPromise();
-    this.items = items.json();
-  }
-
-  onCreate(name) {
-    if (this.autocompleteForm.controls.name.valid) {
-      this.selected = true;
-      this.create.emit({name, type:this.type});
+    if (this._dozn.apiKey) {
+      try {
+        const items = await this.http.get(this.getCloudFunctionUrl(this.type, this._dozn.apiKey)).toPromise();
+        this.items = items.json();
+      } catch (error) {
+        throw error._body;
+      }
     }
   }
 
-  selectItem(item) {
+  getCloudFunctionUrl(type, apiKey) {
+    if (type === 'user') {
+      return this._dozn.environment.firebase.GET_COMPANY_USERS + apiKey;
+    } else if (type === 'feature'){
+      return this._dozn.environment.firebase.GET_FEATURES + apiKey;
+    } else {
+      return this._dozn.environment.firebase.GET_FLOWS + apiKey;
+    }
+  }
+
+  onType(value: string) {
+    if (this.selected) {
+      this.selected = false;
+      const item = {name: '', id:'', type: this.type};
+      this.autocompleteSelected.emit(item);
+    }
+  }
+
+  onCreateOption(name: string) {
     if (this.autocompleteForm.controls.name.valid) {
-      this.name = item.name;
       this.selected = true;
-      this.autocompleteSelected.emit({item, type: this.type});
+      this.name = name;
+
+      const option = {name: name, type: this.type};
+      this.create.emit(option);
+    }
+  }
+
+  onSelectOption(item: DoznIonic.ItemOption) {
+    if (this.autocompleteForm.controls.name.valid) {
+      this.selected = true;
+      this.name = item.name;
+
+      const option = {name: item.name, id: item.id, type: this.type};
+      this.autocompleteSelected.emit(option);
     }
   }
 }
