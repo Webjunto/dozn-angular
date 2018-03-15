@@ -11,7 +11,6 @@ import { DoznIonic } from '../../models/models';
   <app-dialog [(visible)]="showDialog">
     <h1>Welcome to</h1>
     <h2>Dozn</h2>
-    <h4>Intro text</h4>
     <div class="form">
       <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT USER" type="user"></auto-complete>
       <auto-complete (create)="onCreate($event)" (autocompleteSelected)="onSelect($event)" label="SELECT FEATURE" type="feature"></auto-complete>
@@ -32,6 +31,9 @@ import { DoznIonic } from '../../models/models';
     `.form {
       font-family: Arial, Helvetica, sans-serif;
       color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }`,
     `.form label {
       display: block;
