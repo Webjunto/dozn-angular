@@ -1,4 +1,4 @@
-import { Component, Renderer, OnInit, Input } from '@angular/core';
+import { Component, Renderer, OnInit, Input, NgZone } from '@angular/core';
 import {Router, NavigationEnd } from '@angular/router';
 import { Http } from '@angular/http';
 

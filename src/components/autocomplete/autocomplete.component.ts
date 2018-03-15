@@ -1,4 +1,4 @@
-import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, Inject } from '@angular/core';
+import { Component, OnInit, Input,  Output, EventEmitter, ViewChild, Inject, NgZone } from '@angular/core';
 import { NgModel, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { DoznService } from '../../dozn.service';
