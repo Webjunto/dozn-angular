@@ -33,7 +33,7 @@ import 'rxjs/add/operator/map';
                   !autocompleteForm.controls.name.errors?.maxlength?.requiredLength &&
                   !autocompleteForm.controls.name.hasError('required')"
             (click)="onCreateOption(name)">
-          <p>Create {{ (name.length>9)? (name | slice:0:8)+'...':(name) }} {{type}}</p>
+          <p>Create {{type}} {{ (name.length>9)? (name | slice:0:8)+'...':(name) }}</p>
       </div>
     </form>
   </div>
