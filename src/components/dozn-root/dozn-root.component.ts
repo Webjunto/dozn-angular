@@ -96,11 +96,17 @@ export class DoznAppComponent implements OnInit {
     });
 
     router.events.subscribe((_: NavigationEnd) => {
-      if (_.url) {
-        const url = _.url.replace('/', '');
-        const element = router.config.filter(e => e.path === url)[0];
-        if (element) {
+      if (!!_.url && _.url !== '/' && _.url !== '') {
+        const paths = _.url.split('/');
+        const element = router.config.filter(e => e.path === paths[paths.length - 1])[0];
+
+        if (element.redirectTo) {
+          _dozn.currentViewName = element.redirectTo;
+        } else if (element.hasOwnProperty('component')) {
           _dozn.currentViewName = element.component.name;
+        } else if (!element.component && element.loadChildren) {
+          const moduleName = JSON.stringify(element.loadChildren).match(/(?<=#)[^\]]+/)[0];
+          _dozn.currentViewName = moduleName;
         } else {
           _dozn.currentViewName = 'Route not found';
         }
