@@ -110,7 +110,7 @@ export class AutocompleteComponent implements OnInit {
   onType(value: string) {
     if (this.selected) {
       this.selected = false;
-      const item = {name: '', id:'', type: this.type};
+      const item = {name: value, id:'', type: this.type};
       this.autocompleteSelected.emit(item);
     }
   }

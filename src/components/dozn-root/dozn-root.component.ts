@@ -115,7 +115,7 @@ export class DoznAppComponent implements OnInit {
   }
 
   onSelect(event: DoznIonic.SelectOption) {
-    this.sessionData[event.type] = event.id;
+    this.sessionData[event.type] = event.name;
   }
 
   async onCreate(event: DoznIonic.CreateOption) {
